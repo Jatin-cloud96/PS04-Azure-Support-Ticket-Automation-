@@ -1,0 +1,91 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "benchmark_name": "PS03 Azure Invoice Processing Ground Truth Annotations",
+    "total_samples": 5
+  },
+  "samples": [
+    {
+      "file_name": "INV-2026-001_AcmeCorp.pdf",
+      "format": "Digital PDF",
+      "expected_review_status": "VALID",
+      "expected_values": {
+        "supplier_name": "Acme Industrial Supplies Ltd",
+        "invoice_number": "INV-2026-001",
+        "invoice_date": "2026-03-15",
+        "line_items_count": 3,
+        "subtotal": "1100.00",
+        "tax_amount": "110.00",
+        "total": "1210.00"
+      },
+      "arithmetic_valid": true,
+      "notes": "Standard clean digital invoice with multiple line items, all calculations valid."
+    },
+    {
+      "file_name": "INV-2026-002_Scanned_ApexLogistics.png",
+      "format": "Scanned Image (PNG)",
+      "expected_review_status": "VALID",
+      "expected_values": {
+        "supplier_name": "Apex Logistics & Freight Corp",
+        "invoice_number": "INV-2026-002",
+        "invoice_date": "2026-03-18",
+        "line_items_count": 2,
+        "subtotal": "900.00",
+        "tax_amount": "162.00",
+        "total": "1062.00"
+      },
+      "arithmetic_valid": true,
+      "notes": "Simulated optical scan document with stamp and border. Valid math."
+    },
+    {
+      "file_name": "INV-2026-003_ArithmeticMismatch_VertexTech.pdf",
+      "format": "Digital PDF",
+      "expected_review_status": "REQUIRES_REVIEW",
+      "expected_values": {
+        "supplier_name": "Vertex Cloud Solutions Inc",
+        "invoice_number": "INV-2026-003",
+        "invoice_date": "2026-03-20",
+        "line_items_count": 2,
+        "subtotal": "750.00",
+        "tax_amount": "75.00",
+        "total": "825.00"
+      },
+      "arithmetic_valid": false,
+      "discrepancy_type": "SubtotalMismatch",
+      "notes": "Line item sum ($700.00) differs from stated subtotal ($750.00) by $50.00."
+    },
+    {
+      "file_name": "INV-2026-004_MissingField_NovaServices.pdf",
+      "format": "Digital PDF",
+      "expected_review_status": "REQUIRES_REVIEW",
+      "expected_values": {
+        "supplier_name": "Nova Consulting Services LLP",
+        "invoice_number": null,
+        "invoice_date": "2026-03-22",
+        "line_items_count": 1,
+        "subtotal": "1200.00",
+        "tax_amount": "216.00",
+        "total": "1416.00"
+      },
+      "arithmetic_valid": true,
+      "discrepancy_type": "MissingMandatoryField",
+      "notes": "Invoice number omitted. Must be routed to human review without inventing values."
+    },
+    {
+      "file_name": "INV-2026-005_ZeroTax_BlueOcean.pdf",
+      "format": "Digital PDF",
+      "expected_review_status": "VALID",
+      "expected_values": {
+        "supplier_name": "Blue Ocean Softwares Pvt Ltd",
+        "invoice_number": "INV-2026-005",
+        "invoice_date": "2026-03-25",
+        "line_items_count": 2,
+        "subtotal": "150.00",
+        "tax_amount": "0.00",
+        "total": "150.00"
+      },
+      "arithmetic_valid": true,
+      "notes": "Zero tax rate and split-cent line item totals ($99.99 + $50.01 = $150.00)."
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cerevyn-ps03-invoice-pipeline"
+version = "1.0.0"
+description = "Azure Invoice Processing Pipeline with Azurite, OCR extraction, arithmetic validation, and deduplication."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "azure-functions>=2.0.0",
+    "azure-storage-blob>=12.20.0",
+    "pydantic>=2.7.0",
+    "pytest>=8.0.0",
+    "pillow>=10.0.0",
+    "pypdf>=4.0.0",
+    "reportlab>=4.0.0"
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"

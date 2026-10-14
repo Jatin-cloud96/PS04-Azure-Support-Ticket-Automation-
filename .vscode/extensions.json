@@ -1,0 +1,10 @@
+{
+  "recommendations": [
+    "ms-azuretools.vscode-azurefunctions",
+    "ms-azuretools.vscode-azurite",
+    "ms-azuretools.vscode-azurestorage",
+    "ms-python.python",
+    "ms-python.debugpy",
+    "tamasfe.even-better-toml"
+  ]
+}

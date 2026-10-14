@@ -1,0 +1,125 @@
+{
+  "invoice_id": "INV-2026-003",
+  "review_status": "REQUIRES_REVIEW",
+  "review_reasons": [
+    "Subtotal mismatch: sum of line items is 700.00, but stated subtotal is 750.00 (difference: 50.00)."
+  ],
+  "invoice_data": {
+    "supplier_name": "Vertex Cloud Solutions Inc",
+    "supplier_address": "500 Silicon Vista, Hyderabad, TS 500081",
+    "invoice_number": "INV-2026-003",
+    "invoice_date": "2026-03-20",
+    "line_items": [
+      {
+        "description": "Dedicated Compute Node",
+        "quantity": "3",
+        "unit_price": "200.00",
+        "total_amount": "600.00"
+      },
+      {
+        "description": "Storage Volume 2TB",
+        "quantity": "2",
+        "unit_price": "50.00",
+        "total_amount": "100.00"
+      }
+    ],
+    "subtotal": "750.00",
+    "tax_rate_percent": "10",
+    "tax_amount": "75.00",
+    "total": "825.00",
+    "missing_fields": [],
+    "uncertain_fields": [],
+    "field_evidence": {
+      "supplier_name": {
+        "field_name": "supplier_name",
+        "value": "Vertex Cloud Solutions Inc",
+        "confidence": 0.95,
+        "source_page": 1,
+        "text_snippet": "Vertex Cloud Solutions Inc",
+        "bounding_box": null
+      },
+      "supplier_address": {
+        "field_name": "supplier_address",
+        "value": "500 Silicon Vista, Hyderabad, TS 500081",
+        "confidence": 0.88,
+        "source_page": 1,
+        "text_snippet": "500 Silicon Vista, Hyderabad, TS 500081",
+        "bounding_box": null
+      },
+      "invoice_number": {
+        "field_name": "invoice_number",
+        "value": "INV-2026-003",
+        "confidence": 0.98,
+        "source_page": 1,
+        "text_snippet": "Invoice #: INV-2026-003",
+        "bounding_box": null
+      },
+      "invoice_date": {
+        "field_name": "invoice_date",
+        "value": "2026-03-20",
+        "confidence": 0.92,
+        "source_page": 1,
+        "text_snippet": "Invoice Date: 2026-03-20",
+        "bounding_box": null
+      },
+      "line_items": {
+        "field_name": "line_items",
+        "value": "2 items extracted",
+        "confidence": 0.9,
+        "source_page": 1,
+        "text_snippet": "Dedicated Compute Node | 3 @ 200.00 = 600.00; Storage Volume 2TB | 2 @ 50.00 = 100.00",
+        "bounding_box": null
+      },
+      "subtotal": {
+        "field_name": "subtotal",
+        "value": "750.00",
+        "confidence": 0.95,
+        "source_page": 1,
+        "text_snippet": "Subtotal: $750.00",
+        "bounding_box": null
+      },
+      "tax_amount": {
+        "field_name": "tax_amount",
+        "value": "75.00",
+        "confidence": 0.92,
+        "source_page": 1,
+        "text_snippet": "Tax (10%): $75.00",
+        "bounding_box": null
+      },
+      "total": {
+        "field_name": "total",
+        "value": "825.00",
+        "confidence": 0.96,
+        "source_page": 1,
+        "text_snippet": "Total: $825.00",
+        "bounding_box": null
+      }
+    },
+    "raw_text": "Vertex Cloud Solutions Inc\n500 Silicon Vista, Hyderabad, TS 500081\nINVOICE\nInvoice #: INV-2026-003\nInvoice Date: 2026-03-20\nBill To:\nCerevyn Assessment Client Corp\n404 Enterprise Way, Tech Corridor, India\nDescription\nQuantity\nUnit Price\nTotal Amount\nDedicated Compute Node\n3\n$200.00\n$600.00\nStorage Volume 2TB\n2\n$50.00\n$100.00\nSubtotal:\n$750.00\nTax (10%):\n$75.00\nTotal:\n$825.00\nThank you for your business. Please remit payment within 30 days.\n"
+  },
+  "arithmetic_validation": {
+    "is_valid": false,
+    "calculated_subtotal": "700.00",
+    "stated_subtotal": "750.00",
+    "calculated_tax": "75.00",
+    "stated_tax": "75.00",
+    "calculated_total": "825.00",
+    "stated_total": "825.00",
+    "line_item_math_valid": true,
+    "subtotal_tax_sum_valid": true,
+    "rounding_method": "ROUND_HALF_UP (2 decimal places, tolerance +/- 0.01)",
+    "errors": [
+      "Subtotal mismatch: sum of line items is 700.00, but stated subtotal is 750.00 (difference: 50.00)."
+    ]
+  },
+  "metadata": {
+    "source_blob_name": "INV-2026-003_ArithmeticMismatch_VertexTech.pdf",
+    "file_sha256": "85f45bd291fac6f7801d914cde4f53365e09a38a6b57a6342afa587408ee4b44",
+    "file_size_bytes": 2345,
+    "content_type": "application/pdf",
+    "processed_timestamp_utc": "2026-10-14T17:44:06.425535+00:00",
+    "extractor_engine": "PDFTextExtractor",
+    "processing_duration_ms": 4.7,
+    "retry_count": 0
+  }
+}

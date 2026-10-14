@@ -1,0 +1,25 @@
+{
+  "log_type": "RETRY_ATTEMPT_AUDIT_LOG",
+  "blob_name": "INV-2026-003_ArithmeticMismatch_VertexTech.pdf",
+  "trigger_source": "AzureBlobTrigger",
+  "execution_id": "893fa91c-7cb0-4f81-a67b-12d458bc9112",
+  "retry_policy": {
+    "strategy": "exponential_backoff",
+    "initial_interval_ms": 1000,
+    "max_interval_ms": 10000,
+    "max_retries": 3
+  },
+  "attempts": [
+    {
+      "attempt_number": 1,
+      "status": "COMPLETED",
+      "action": "EVALUATED_AND_FLAGGED_FOR_HUMAN_REVIEW",
+      "reason": "Subtotal mismatch: sum of line items is 700.00, but stated subtotal is 750.00",
+      "routed_to": "invoices-review",
+      "latency_ms": 11.2,
+      "timestamp_utc": "2026-10-14T17:35:12.441201+00:00"
+    }
+  ],
+  "final_status": "REQUIRES_REVIEW",
+  "duplicate_check": "NEW_HASH_REGISTERED"
+}

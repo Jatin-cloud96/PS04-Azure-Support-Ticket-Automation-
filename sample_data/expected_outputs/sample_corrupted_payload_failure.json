@@ -1,0 +1,17 @@
+{
+  "log_type": "POISON_BLOB_FAILURE_LOG",
+  "blob_name": "corrupted_invoice_payload.pdf",
+  "container": "invoices-failed",
+  "error_code": "DOCUMENT_EXTRACTION_FAILURE",
+  "error_message": "Invalid PDF header: stream does not begin with '%PDF-'. File appears corrupted or truncated.",
+  "retry_count": 3,
+  "max_retries_exceeded": true,
+  "dead_letter_action": "ROUTED_TO_DLQ_CONTAINER",
+  "source_sha256": "4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a",
+  "timestamp_utc": "2026-10-14T17:35:10.124567+00:00",
+  "stack_trace": [
+    "File 'src/core/extractor.py', line 94, in extract_text: pypdf.errors.PdfReadError: EOF marker not found",
+    "File 'src/core/pipeline.py', line 68, in process_invoice: raise ExtractionError('Document corrupted')",
+    "File 'function_app.py', line 54, in process_invoice_blob: routing to invoices-failed"
+  ]
+}

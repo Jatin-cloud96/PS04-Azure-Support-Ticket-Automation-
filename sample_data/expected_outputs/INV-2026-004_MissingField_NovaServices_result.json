@@ -1,0 +1,111 @@
+{
+  "invoice_id": "INV-2026-004_MissingField_NovaServices.pdf",
+  "review_status": "REQUIRES_REVIEW",
+  "review_reasons": [
+    "Missing mandatory field(s): invoice_number"
+  ],
+  "invoice_data": {
+    "supplier_name": "Nova Consulting Services LLP",
+    "supplier_address": "15 Connaught Place, New Delhi, DL 110001",
+    "invoice_number": null,
+    "invoice_date": "2026-03-22",
+    "line_items": [
+      {
+        "description": "Cloud Architecture Audit",
+        "quantity": "1",
+        "unit_price": "1200.00",
+        "total_amount": "1200.00"
+      }
+    ],
+    "subtotal": "1200.00",
+    "tax_rate_percent": "18",
+    "tax_amount": "216.00",
+    "total": "1416.00",
+    "missing_fields": [
+      "invoice_number"
+    ],
+    "uncertain_fields": [],
+    "field_evidence": {
+      "supplier_name": {
+        "field_name": "supplier_name",
+        "value": "Nova Consulting Services LLP",
+        "confidence": 0.95,
+        "source_page": 1,
+        "text_snippet": "Nova Consulting Services LLP",
+        "bounding_box": null
+      },
+      "supplier_address": {
+        "field_name": "supplier_address",
+        "value": "15 Connaught Place, New Delhi, DL 110001",
+        "confidence": 0.88,
+        "source_page": 1,
+        "text_snippet": "15 Connaught Place, New Delhi, DL 110001",
+        "bounding_box": null
+      },
+      "invoice_date": {
+        "field_name": "invoice_date",
+        "value": "2026-03-22",
+        "confidence": 0.92,
+        "source_page": 1,
+        "text_snippet": "Invoice Date: 2026-03-22",
+        "bounding_box": null
+      },
+      "line_items": {
+        "field_name": "line_items",
+        "value": "1 items extracted",
+        "confidence": 0.9,
+        "source_page": 1,
+        "text_snippet": "Cloud Architecture Audit | 1 @ 1200.00 = 1200.00",
+        "bounding_box": null
+      },
+      "subtotal": {
+        "field_name": "subtotal",
+        "value": "1200.00",
+        "confidence": 0.95,
+        "source_page": 1,
+        "text_snippet": "Subtotal: $1200.00",
+        "bounding_box": null
+      },
+      "tax_amount": {
+        "field_name": "tax_amount",
+        "value": "216.00",
+        "confidence": 0.92,
+        "source_page": 1,
+        "text_snippet": "Tax (18%): $216.00",
+        "bounding_box": null
+      },
+      "total": {
+        "field_name": "total",
+        "value": "1416.00",
+        "confidence": 0.96,
+        "source_page": 1,
+        "text_snippet": "Total: $1416.00",
+        "bounding_box": null
+      }
+    },
+    "raw_text": "Nova Consulting Services LLP\n15 Connaught Place, New Delhi, DL 110001\nINVOICE\nInvoice #: [NOT SPECIFIED]\n Invoice Date: 2026-03-22\nBill To:\nCerevyn Assessment Client Corp\n404 Enterprise Way, Tech Corridor, India\nDescription\nQuantity\nUnit Price\nTotal Amount\nCloud Architecture Audit\n1\n$1200.00\n$1200.00\nSubtotal:\n$1200.00\nTax (18%):\n$216.00\nTotal:\n$1416.00\nThank you for your business. Please remit payment within 30 days.\n"
+  },
+  "arithmetic_validation": {
+    "is_valid": true,
+    "calculated_subtotal": "1200.00",
+    "stated_subtotal": "1200.00",
+    "calculated_tax": "216.00",
+    "stated_tax": "216.00",
+    "calculated_total": "1416.00",
+    "stated_total": "1416.00",
+    "line_item_math_valid": true,
+    "subtotal_tax_sum_valid": true,
+    "rounding_method": "ROUND_HALF_UP (2 decimal places, tolerance +/- 0.01)",
+    "errors": []
+  },
+  "metadata": {
+    "source_blob_name": "INV-2026-004_MissingField_NovaServices.pdf",
+    "file_sha256": "99c518c17d44856f081f0ad38a6d2978727a27256646557d7e64de07959cba3d",
+    "file_size_bytes": 2305,
+    "content_type": "application/pdf",
+    "processed_timestamp_utc": "2026-10-14T17:44:06.431593+00:00",
+    "extractor_engine": "PDFTextExtractor",
+    "processing_duration_ms": 4.98,
+    "retry_count": 0
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "python",
+    "INPUT_CONTAINER": "invoices-input",
+    "OUTPUT_CONTAINER": "invoices-output",
+    "REVIEW_CONTAINER": "invoices-review",
+    "FAILED_CONTAINER": "invoices-failed",
+    "CONFIDENCE_THRESHOLD": "0.70"
+  }
+}
