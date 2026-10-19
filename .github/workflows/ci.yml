@@ -12,12 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
-    services:
-      azurite:
-        image: mcr.microsoft.com/azure-storage/azurite
-        ports:
-          - 10000:10000
-
     env:
       PYTHONPATH: .
       AZURE_STORAGE_CONNECTION_STRING: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;"
@@ -31,29 +25,24 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Create and activate virtual environment
+      - name: Install Azurite Storage Emulator
+        run: |
+          npm install -g azurite
+          azurite --version
+
+      - name: Start Azurite Storage Emulator
+        run: |
+          mkdir -p .azurite
+          nohup azurite --silent --skipApiVersionCheck --location .azurite --blobHost 127.0.0.1 --blobPort 10000 > azurite.log 2>&1 &
+          sleep 3
+
+      - name: Create Virtual Environment and Install Dependencies
         run: |
           python -m venv .venv
           echo "$GITHUB_WORKSPACE/.venv/bin" >> $GITHUB_PATH
           echo "VIRTUAL_ENV=$GITHUB_WORKSPACE/.venv" >> $GITHUB_ENV
-
-      - name: Wait for Azurite Service
-        run: |
-          python -c "
-          import socket, time
-          for _ in range(30):
-              try:
-                  with socket.create_connection(('127.0.0.1', 10000), timeout=1):
-                      print('Azurite is ready on port 10000.')
-                      break
-              except OSError:
-                  time.sleep(1)
-          "
-
-      - name: Install Python Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install -r requirements.txt
+          .venv/bin/python -m pip install --upgrade pip setuptools wheel
+          .venv/bin/python -m pip install -r requirements.txt
 
       - name: Verify Sample Invoices Generation
         run: |
