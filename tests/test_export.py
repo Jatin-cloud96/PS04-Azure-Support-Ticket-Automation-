@@ -6,10 +6,18 @@ Verifies RFC 4180 compliance, header alignment, and status filtering.
 import csv
 import io
 import json
+import pytest
 from fastapi.testclient import TestClient
 from src.ui.app import app
 
 client = TestClient(app)
+
+
+@pytest.fixture(scope="module", autouse=True)
+def seed_processed_invoices():
+    """Process all sample invoices into Azurite so the export tests don't depend on test order."""
+    response = client.post("/api/run-pipeline")
+    assert response.status_code == 200, response.text
 
 
 def test_export_csv_all_records():
