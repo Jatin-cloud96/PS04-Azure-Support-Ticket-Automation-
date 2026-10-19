@@ -60,7 +60,12 @@ jobs:
 
       - name: Run Pytest Suite
         run: |
-          python -m pytest -v --tb=short
+          python -m pytest -v --tb=short > pytest_output.log 2>&1 || {
+            cat pytest_output.log
+            ERR=$(tail -n 20 pytest_output.log | tr '\n' ' ')
+            echo "::error title=Pytest Failure::$ERR"
+            exit 1
+          }
 
       - name: Run End-to-End Local Ingestion Demonstration
         run: |
