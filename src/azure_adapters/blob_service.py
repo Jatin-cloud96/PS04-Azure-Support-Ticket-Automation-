@@ -4,14 +4,23 @@ Encapsulates container management, blob I/O, idempotency tracking, and output ro
 """
 
 from __future__ import annotations
-import json
-from typing import Optional, List, Dict, Any, Tuple
-from azure.storage.blob import BlobServiceClient, ContainerClient, BlobClient
-from azure.core.exceptions import ResourceExistsError, ResourceNotFoundError
+
+import os
+from typing import Optional, List, Dict, Tuple
+
+from azure.storage.blob import (
+    BlobServiceClient,
+    ContentSettings,
+)
+from azure.core.exceptions import ResourceExistsError
 
 from src.core.models import ProcessedInvoiceRecord, ReviewStatus
 
+
 DEFAULT_CONNECTION_STRING = "UseDevelopmentStorage=true"
+
+# Pin the API version instead of using the SDK's default.
+AZURE_STORAGE_API_VERSION = "2023-11-03"
 
 CONTAINER_INPUT = "invoices-input"
 CONTAINER_OUTPUT = "invoices-output"
@@ -24,7 +33,7 @@ ALL_CONTAINERS = [
     CONTAINER_OUTPUT,
     CONTAINER_REVIEW,
     CONTAINER_FAILED,
-    CONTAINER_HASHES
+    CONTAINER_HASHES,
 ]
 
 
@@ -32,16 +41,24 @@ class AzureBlobAdapter:
     """Wrapper for Azure Blob Storage operations with Azurite support."""
 
     def __init__(self, connection_string: Optional[str] = None):
-        import os
-        self.connection_string = connection_string or os.environ.get("AZURE_STORAGE_CONNECTION_STRING") or DEFAULT_CONNECTION_STRING
-        self.blob_service_client = BlobServiceClient.from_connection_string(self.connection_string)
+        self.connection_string = (
+            connection_string
+            or os.environ.get("AZURE_STORAGE_CONNECTION_STRING")
+            or DEFAULT_CONNECTION_STRING
+        )
+
+        self.blob_service_client = BlobServiceClient.from_connection_string(
+            self.connection_string,
+            api_version=AZURE_STORAGE_API_VERSION,
+        )
 
     def initialize_containers(self) -> None:
-        """Creates required pipeline containers if they do not exist."""
+        """Create required pipeline containers if they do not exist."""
         for container_name in ALL_CONTAINERS:
             try:
                 self.blob_service_client.create_container(container_name)
             except ResourceExistsError:
+                # The container already exists.
                 pass
 
     def upload_blob(
@@ -50,60 +67,99 @@ class AzureBlobAdapter:
         blob_name: str,
         data: bytes | str,
         content_type: str = "application/octet-stream",
-        metadata: Optional[Dict[str, str]] = None
+        metadata: Optional[Dict[str, str]] = None,
     ) -> str:
-        """Uploads content to specified container."""
-        container_client = self.blob_service_client.get_container_client(container_name)
+        """Upload content to the specified container."""
+        container_client = self.blob_service_client.get_container_client(
+            container_name
+        )
         blob_client = container_client.get_blob_client(blob_name)
-        
+
         payload = data.encode("utf-8") if isinstance(data, str) else data
-        blob_client.upload_blob(payload, overwrite=True, metadata=metadata)
+
+        blob_client.upload_blob(
+            payload,
+            overwrite=True,
+            metadata=metadata,
+            content_settings=ContentSettings(content_type=content_type),
+        )
+
         return blob_client.url
 
     def download_blob(self, container_name: str, blob_name: str) -> bytes:
-        """Downloads blob bytes from container."""
-        container_client = self.blob_service_client.get_container_client(container_name)
+        """Download blob bytes from a container."""
+        container_client = self.blob_service_client.get_container_client(
+            container_name
+        )
         blob_client = container_client.get_blob_client(blob_name)
+
         return blob_client.download_blob().readall()
 
     def list_blobs(self, container_name: str) -> List[str]:
-        """Lists blob names in specified container."""
-        container_client = self.blob_service_client.get_container_client(container_name)
-        return [b.name for b in container_client.list_blobs()]
+        """Return the names of blobs in a container."""
+        container_client = self.blob_service_client.get_container_client(
+            container_name
+        )
+
+        return [blob.name for blob in container_client.list_blobs()]
 
     def is_hash_registered(self, content_hash: str) -> bool:
-        """Checks if a content hash exists in the hashes container."""
+        """Check whether a content hash exists in the hashes container."""
         try:
-            container_client = self.blob_service_client.get_container_client(CONTAINER_HASHES)
-            blob_client = container_client.get_blob_client(f"{content_hash}.txt")
+            container_client = self.blob_service_client.get_container_client(
+                CONTAINER_HASHES
+            )
+            blob_client = container_client.get_blob_client(
+                f"{content_hash}.txt"
+            )
+
             return blob_client.exists()
+
         except Exception:
             return False
 
     def register_hash(self, content_hash: str, filename: str) -> None:
-        """Registers a hash into the hashes container."""
-        container_client = self.blob_service_client.get_container_client(CONTAINER_HASHES)
-        blob_client = container_client.get_blob_client(f"{content_hash}.txt")
-        blob_client.upload_blob(f"processed:{filename}".encode("utf-8"), overwrite=True)
+        """Register a content hash to prevent duplicate processing."""
+        container_client = self.blob_service_client.get_container_client(
+            CONTAINER_HASHES
+        )
+        blob_client = container_client.get_blob_client(
+            f"{content_hash}.txt"
+        )
 
-    def route_processed_record(self, record: ProcessedInvoiceRecord) -> Tuple[str, str]:
+        blob_client.upload_blob(
+            f"processed:{filename}".encode("utf-8"),
+            overwrite=True,
+            content_settings=ContentSettings(
+                content_type="text/plain"
+            ),
+        )
+
+    def route_processed_record(
+        self,
+        record: ProcessedInvoiceRecord,
+    ) -> Tuple[str, str]:
         """
-        Saves structured JSON output to the appropriate container based on ReviewStatus:
-        - VALID -> invoices-output
-        - REQUIRES_REVIEW -> invoices-review
-        - FAILED or DUPLICATE_SKIPPED -> invoices-failed or review queue
-        Returns (destination_container, output_blob_name).
+        Save structured JSON output to the appropriate container.
+
+        VALID -> invoices-output
+        REQUIRES_REVIEW -> invoices-review
+        FAILED or DUPLICATE_SKIPPED -> invoices-failed
+
+        Returns:
+            A tuple containing the destination container and blob name.
         """
         base_name = record.metadata.source_blob_name.rsplit(".", 1)[0]
         output_blob_name = f"{base_name}_result.json"
 
-        # Serialize Pydantic model with Decimals converted to float/string
         json_data = record.model_dump_json(indent=2)
 
         if record.review_status == ReviewStatus.VALID:
             target_container = CONTAINER_OUTPUT
+
         elif record.review_status == ReviewStatus.REQUIRES_REVIEW:
             target_container = CONTAINER_REVIEW
+
         else:
             target_container = CONTAINER_FAILED
 
@@ -115,12 +171,18 @@ class AzureBlobAdapter:
             metadata={
                 "review_status": record.review_status.value,
                 "file_sha256": record.metadata.file_sha256,
-                "invoice_id": record.invoice_id
-            }
+                "invoice_id": str(record.invoice_id),
+            },
         )
 
-        # Register hash if it was a processed document
-        if record.review_status in (ReviewStatus.VALID, ReviewStatus.REQUIRES_REVIEW):
-            self.register_hash(record.metadata.file_sha256, record.metadata.source_blob_name)
+        # Register hashes for processed documents.
+        if record.review_status in (
+            ReviewStatus.VALID,
+            ReviewStatus.REQUIRES_REVIEW,
+        ):
+            self.register_hash(
+                record.metadata.file_sha256,
+                record.metadata.source_blob_name,
+            )
 
         return target_container, output_blob_name
