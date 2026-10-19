@@ -146,12 +146,22 @@ All pipeline events emit structured JSON logs and custom metrics:
 - Azure CLI (`az`) installed and authenticated (`az login`)
 - An active Azure Subscription
 
-### 6.1 Step 1: Create Resource Group
+### 6.0 Declarative Infrastructure-as-Code Deployment (Azure Bicep)
+The repository includes a production-ready Bicep template in [`infra/main.bicep`](../infra/main.bicep) that provisions the entire architecture with one command:
+
 ```bash
-az group create \
-  --name rg-cerevyn-invoices-prod \
-  --location eastus
+# 1. Create Resource Group
+az group create --name rg-cerevyn-invoices-prod --location eastus
+
+# 2. Deploy complete cloud infrastructure via Bicep
+az deployment group create \
+  --resource-group rg-cerevyn-invoices-prod \
+  --template-file infra/main.bicep \
+  --parameters environment=prod
 ```
+
+### 6.1 Manual Step-by-Step Deployment (CLI Alternative)
+If deploying resource-by-resource manually via Azure CLI:
 
 ### 6.2 Step 2: Provision Azure Storage Account
 ```bash

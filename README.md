@@ -78,7 +78,10 @@ Cerevyn-Chitkara-RollNumber-PS03/
 │   └── workflows/
 │       └── ci.yml                     # GitHub Actions automated test & verification workflow
 ├── docs/
-│   └── azure-plan.md                  # Comprehensive Azure Cloud Deployment & IaC Plan
+│   ├── azure-plan.md                  # Comprehensive Azure Cloud Deployment & IaC Plan
+│   └── demo-guide.md                  # 3 to 5 minute presentation & video script
+├── infra/
+│   └── main.bicep                     # Production Azure Bicep Infrastructure-as-Code template
 ├── sample_data/
 │   ├── annotations.json               # Ground-truth annotations for all 5 test scenarios
 │   ├── invoices/                      # 5 fictional test invoices

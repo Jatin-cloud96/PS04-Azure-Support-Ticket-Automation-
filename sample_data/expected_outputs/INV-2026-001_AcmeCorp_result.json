@@ -119,9 +119,9 @@
     "file_sha256": "67bb614d2eea9b3cc7e100a8986232042625801c8577565de98455f62524b2d7",
     "file_size_bytes": 2407,
     "content_type": "application/pdf",
-    "processed_timestamp_utc": "2026-10-19T13:37:42.889614+00:00",
+    "processed_timestamp_utc": "2026-10-19T13:43:27.408040+00:00",
     "extractor_engine": "PDFTextExtractor",
-    "processing_duration_ms": 8.85,
+    "processing_duration_ms": 19.64,
     "retry_count": 0
   }
 }
