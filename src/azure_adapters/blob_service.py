@@ -32,7 +32,8 @@ class AzureBlobAdapter:
     """Wrapper for Azure Blob Storage operations with Azurite support."""
 
     def __init__(self, connection_string: Optional[str] = None):
-        self.connection_string = connection_string or DEFAULT_CONNECTION_STRING
+        import os
+        self.connection_string = connection_string or os.environ.get("AZURE_STORAGE_CONNECTION_STRING") or DEFAULT_CONNECTION_STRING
         self.blob_service_client = BlobServiceClient.from_connection_string(self.connection_string)
 
     def initialize_containers(self) -> None:
