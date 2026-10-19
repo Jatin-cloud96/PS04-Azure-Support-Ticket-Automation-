@@ -10,7 +10,17 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
+
+    services:
+      azurite:
+        image: mcr.microsoft.com/azure-storage/azurite
+        ports:
+          - 10000:10000
+
+    env:
+      PYTHONPATH: .
+      AZURE_STORAGE_CONNECTION_STRING: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;"
 
     steps:
       - name: Checkout Repository
@@ -20,28 +30,30 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: "pip"
 
-      - name: Set up Node.js for Azurite Emulator
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
-      - name: Install Azurite Storage Emulator
+      - name: Create and activate virtual environment
         run: |
-          npm install -g azurite
-          azurite --version
+          python -m venv .venv
+          echo "$GITHUB_WORKSPACE/.venv/bin" >> $GITHUB_PATH
+          echo "VIRTUAL_ENV=$GITHUB_WORKSPACE/.venv" >> $GITHUB_ENV
 
-      - name: Start Azurite in Background
+      - name: Wait for Azurite Service
         run: |
-          mkdir -p .azurite
-          azurite --silent --skipApiVersionCheck --location .azurite --blobHost 127.0.0.1 --blobPort 10000 &
-          sleep 3
+          python -c "
+          import socket, time
+          for _ in range(30):
+              try:
+                  with socket.create_connection(('127.0.0.1', 10000), timeout=1):
+                      print('Azurite is ready on port 10000.')
+                      break
+              except OSError:
+                  time.sleep(1)
+          "
 
       - name: Install Python Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          python -m pip install -r requirements.txt
 
       - name: Verify Sample Invoices Generation
         run: |
