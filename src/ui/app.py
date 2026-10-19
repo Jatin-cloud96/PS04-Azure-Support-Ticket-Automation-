@@ -5,14 +5,16 @@ one-click invoice processing, arithmetic discrepancy inspection, and upload capa
 """
 
 import os
+import csv
+import io
 import json
 import socket
 import time
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Query
+from fastapi.responses import HTMLResponse, JSONResponse, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.core.pipeline import InvoicePipelineService
@@ -193,6 +195,108 @@ def get_accuracy():
     return evaluate_pipeline(PROJECT_ROOT)
 
 
+@app.get("/api/export/csv")
+def export_invoices_csv(status: Optional[str] = Query(None, description="Filter by ReviewStatus, e.g. VALID")):
+    """
+    Exports the invoice ledger to a downloadable RFC 4180 compliant CSV file.
+    Optionally filter by status (e.g. status=VALID for approved accounting records).
+    """
+    invoices = get_processed_invoices()
+    if status:
+        target_status = status.strip().upper()
+        invoices = [inv for inv in invoices if inv.get("review_status", "").upper() == target_status]
+
+    output = io.StringIO()
+    writer = csv.writer(output, quoting=csv.QUOTE_MINIMAL)
+
+    # CSV Header Row
+    writer.writerow([
+        "Invoice ID",
+        "Source File",
+        "Review Status",
+        "Target Container",
+        "Supplier Name",
+        "Supplier Address",
+        "Invoice Number",
+        "Invoice Date",
+        "Subtotal",
+        "Tax Amount",
+        "Grand Total",
+        "Line Items Count",
+        "Arithmetic Valid",
+        "Review Reasons",
+        "SHA256 Hash",
+        "Processing Latency (ms)",
+        "Processed Timestamp UTC"
+    ])
+
+    for inv in invoices:
+        inv_data = inv.get("invoice_data") or {}
+        arith = inv.get("arithmetic_validation") or {}
+        meta = inv.get("metadata") or {}
+        reasons = "; ".join(inv.get("review_reasons") or [])
+        items_count = len(inv_data.get("line_items") or [])
+
+        def format_money(val):
+            if val is None or val == "":
+                return ""
+            try:
+                return f"{float(val):.2f}"
+            except (ValueError, TypeError):
+                return str(val)
+
+        writer.writerow([
+            inv.get("invoice_id", ""),
+            meta.get("source_blob_name", ""),
+            inv.get("review_status", ""),
+            inv.get("container", ""),
+            inv_data.get("supplier_name", ""),
+            inv_data.get("supplier_address", ""),
+            inv_data.get("invoice_number", "") or "NOT SPECIFIED",
+            inv_data.get("invoice_date", ""),
+            format_money(inv_data.get("subtotal")),
+            format_money(inv_data.get("tax_amount")),
+            format_money(inv_data.get("total")),
+            items_count,
+            "YES" if arith.get("is_valid") else "NO",
+            reasons,
+            meta.get("file_sha256", ""),
+            meta.get("processing_duration_ms", ""),
+            meta.get("processed_timestamp_utc", "")
+        ])
+
+    csv_data = output.getvalue()
+    filename = f"invoices_approved_valid_{int(time.time())}.csv" if status == "VALID" else f"invoices_ledger_{int(time.time())}.csv"
+
+    return Response(
+        content=csv_data,
+        media_type="text/csv",
+        headers={
+            "Content-Disposition": f"attachment; filename=\"{filename}\"",
+            "Cache-Control": "no-cache"
+        }
+    )
+
+
+@app.get("/api/export/json")
+def export_invoices_json(status: Optional[str] = Query(None)):
+    """Exports full structured JSON ledger for downstream ERP/accounting integration."""
+    invoices = get_processed_invoices()
+    if status:
+        target_status = status.strip().upper()
+        invoices = [inv for inv in invoices if inv.get("review_status", "").upper() == target_status]
+
+    filename = f"invoices_ledger_{int(time.time())}.json"
+    return Response(
+        content=json.dumps(invoices, indent=2),
+        media_type="application/json",
+        headers={
+            "Content-Disposition": f"attachment; filename=\"{filename}\"",
+            "Cache-Control": "no-cache"
+        }
+    )
+
+
 @app.get("/", response_class=HTMLResponse)
 def serve_dashboard():
     html_content = """
@@ -305,12 +409,25 @@ def serve_dashboard():
 
     <!-- Invoice Cards / Table -->
     <div class="bg-slate-800/50 border border-slate-700/60 rounded-xl overflow-hidden shadow-xl">
-      <div class="px-5 py-3.5 border-b border-slate-700/60 flex justify-between items-center bg-slate-800/80">
-        <h2 class="font-semibold text-sm flex items-center gap-2 text-slate-200">
-          <i class="fa-solid fa-list-check text-indigo-400"></i>
-          Processed Invoices Ledger
-        </h2>
-        <span class="text-xs text-slate-400" id="invoices-count">Loading...</span>
+      <div class="px-5 py-3.5 border-b border-slate-700/60 flex flex-wrap justify-between items-center gap-3 bg-slate-800/80">
+        <div class="flex items-center gap-3">
+          <h2 class="font-semibold text-sm flex items-center gap-2 text-slate-200">
+            <i class="fa-solid fa-list-check text-indigo-400"></i>
+            Processed Invoices Ledger
+          </h2>
+          <span class="text-xs text-slate-400 font-mono" id="invoices-count">Loading...</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <a href="/api/export/csv" download="invoices_ledger.csv" class="px-3 py-1.5 bg-emerald-600/80 hover:bg-emerald-500 active:scale-95 text-white text-xs font-medium rounded-lg transition flex items-center gap-1.5 shadow-sm shadow-emerald-700/30">
+            <i class="fa-solid fa-file-csv"></i> Export CSV
+          </a>
+          <a href="/api/export/csv?status=VALID" download="approved_payments.csv" class="px-3 py-1.5 bg-sky-600/80 hover:bg-sky-500 active:scale-95 text-white text-xs font-medium rounded-lg transition flex items-center gap-1.5 shadow-sm shadow-sky-700/30">
+            <i class="fa-solid fa-circle-check"></i> Export Approved (Valid)
+          </a>
+          <a href="/api/export/json" download="invoices_ledger.json" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 active:scale-95 text-slate-300 text-xs font-medium rounded-lg transition flex items-center gap-1.5 border border-slate-600">
+            <i class="fa-solid fa-code"></i> JSON
+          </a>
+        </div>
       </div>
       
       <div class="overflow-x-auto">

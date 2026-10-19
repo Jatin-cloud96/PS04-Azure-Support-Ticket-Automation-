@@ -205,6 +205,7 @@ The project includes an interactive web dashboard providing real-time container 
 - **Real-Time Container Overview**: Live counts of `invoices-input`, `invoices-output`, `invoices-review`, `invoices-failed`, and `invoices-hashes`.
 - **One-Click Ingestion**: Click *"Run All 5 Samples"* to execute the complete pipeline.
 - **Detailed Audit Modal**: Inspect line items, arithmetic verification, confidence evidence, and raw JSON payloads.
+- **Accounting & CSV Export**: One-click download of the complete ledger (`/api/export/csv`) or approved-only records (`/api/export/csv?status=VALID`) and full JSON (`/api/export/json`).
 - **Custom Uploads**: Drag-and-drop or upload custom invoices.
 - **Idempotency Simulator**: Click *"Test Duplicate Replay"* to verify duplicate rejection.
 
@@ -295,24 +296,27 @@ pytest -v
 platform win32 -- Python 3.14.3, pytest-9.1.1, pluggy-1.6.0
 cachedir: .pytest_cache
 rootdir: C:\Users\...\Cerevyn-Chitkara-RollNumber-PS03
-collected 14 items
+collected 17 items
 
-tests/test_accuracy_benchmark.py::test_full_benchmark_accuracy PASSED    [  7%]
-tests/test_azure_pipeline.py::test_azure_blob_routing PASSED             [ 14%]
-tests/test_deduplication.py::test_compute_sha256_deterministic PASSED    [ 21%]
-tests/test_deduplication.py::test_registry_prevents_duplicate_reprocessing PASSED [ 28%]
-tests/test_deduplication.py::test_pipeline_deduplication_e2e PASSED      [ 35%]
-tests/test_extraction.py::test_digital_pdf_extraction PASSED             [ 42%]
-tests/test_extraction.py::test_scanned_image_ocr_extraction PASSED       [ 50%]
-tests/test_extraction.py::test_corrupted_file_handling PASSED            [ 57%]
-tests/test_missing_fields.py::test_missing_invoice_number_sample PASSED  [ 64%]
-tests/test_missing_fields.py::test_missing_supplier_name PASSED          [ 71%]
-tests/test_missing_fields.py::test_empty_line_items PASSED               [ 78%]
-tests/test_validation.py::test_arithmetic_mismatch_invoice PASSED        [ 85%]
-tests/test_validation.py::test_rounding_half_up_tolerance PASSED         [ 92%]
+tests/test_accuracy_benchmark.py::test_full_benchmark_accuracy PASSED    [  5%]
+tests/test_azure_pipeline.py::test_azure_blob_routing PASSED             [ 11%]
+tests/test_deduplication.py::test_compute_sha256_deterministic PASSED    [ 17%]
+tests/test_deduplication.py::test_registry_prevents_duplicate_reprocessing PASSED [ 23%]
+tests/test_deduplication.py::test_pipeline_deduplication_e2e PASSED      [ 29%]
+tests/test_export.py::test_export_csv_all_records PASSED                 [ 35%]
+tests/test_export.py::test_export_csv_filtered_valid_only PASSED         [ 41%]
+tests/test_export.py::test_export_json_ledger PASSED                     [ 47%]
+tests/test_extraction.py::test_digital_pdf_extraction PASSED             [ 52%]
+tests/test_extraction.py::test_scanned_image_ocr_extraction PASSED       [ 58%]
+tests/test_extraction.py::test_corrupted_file_handling PASSED            [ 64%]
+tests/test_missing_fields.py::test_missing_invoice_number_sample PASSED  [ 70%]
+tests/test_missing_fields.py::test_missing_supplier_name PASSED          [ 76%]
+tests/test_missing_fields.py::test_empty_line_items PASSED               [ 82%]
+tests/test_validation.py::test_arithmetic_mismatch_invoice PASSED        [ 88%]
+tests/test_validation.py::test_rounding_half_up_tolerance PASSED         [ 94%]
 tests/test_validation.py::test_grand_total_mismatch PASSED               [100%]
 
-============================= 14 passed in 8.87s ==============================
+============================= 17 passed in 1.12s ==============================
 ```
 
 ---
