@@ -45,6 +45,19 @@ jobs:
         run: |
           python src/evaluation/evaluate_accuracy.py
 
+      - name: Wait for Azurite Service
+        run: |
+          for i in $(seq 1 30); do
+            if nc -z 127.0.0.1 10000; then
+              echo "Azurite Blob Service is actively listening on port 10000."
+              exit 0
+            fi
+            echo "Waiting for Azurite on port 10000... ($i/30)"
+            sleep 1
+          done
+          echo "Error: Azurite service container did not start in time."
+          exit 1
+
       - name: Run Pytest Suite
         run: |
           python -m pytest -v --tb=short
