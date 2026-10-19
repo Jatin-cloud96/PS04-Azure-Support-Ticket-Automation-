@@ -1,5 +1,5 @@
 # PS03 Azure Invoice Processing Pipeline Dependencies
-azure-functions>=2.0.0
+azure-functions>=1.18.0
 azure-storage-blob>=12.20.0
 pydantic>=2.7.0
 pytest>=8.0.0
