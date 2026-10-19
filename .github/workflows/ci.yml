@@ -12,12 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
-    services:
-      azurite:
-        image: mcr.microsoft.com/azure-storage/azurite:latest
-        ports:
-          - 10000:10000
-
     env:
       PYTHONPATH: .
       AZURE_STORAGE_CONNECTION_STRING: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;"
@@ -45,6 +39,12 @@ jobs:
         run: |
           python src/evaluation/evaluate_accuracy.py
 
+      - name: Start Azurite Service
+        run: |
+          docker run -d --name azurite -p 10000:10000 \
+            mcr.microsoft.com/azure-storage/azurite:latest \
+            azurite-blob --blobHost 0.0.0.0 --blobPort 10000 --skipApiVersionCheck --loose
+
       - name: Wait for Azurite Service
         run: |
           for i in $(seq 1 30); do
@@ -56,6 +56,7 @@ jobs:
             sleep 1
           done
           echo "Error: Azurite service container did not start in time."
+          docker logs azurite || true
           exit 1
 
       - name: Run Pytest Suite
