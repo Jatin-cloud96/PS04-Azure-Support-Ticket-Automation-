@@ -47,7 +47,7 @@ jobs:
 
       - name: Run Pytest Suite
         run: |
-          pytest -v --tb=short
+          python -m pytest -v --tb=short
 
       - name: Run End-to-End Local Ingestion Demonstration
         run: |

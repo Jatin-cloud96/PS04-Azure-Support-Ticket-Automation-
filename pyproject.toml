@@ -9,7 +9,7 @@ description = "Azure Invoice Processing Pipeline with Azurite, OCR extraction, a
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "azure-functions>=2.0.0",
+    "azure-functions>=1.18.0",
     "azure-storage-blob>=12.20.0",
     "pydantic>=2.7.0",
     "pytest>=8.0.0",
